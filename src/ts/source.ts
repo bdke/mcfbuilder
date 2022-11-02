@@ -1,58 +1,103 @@
-import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import * as path from "path";
+import { workspace, ExtensionContext, languages, DocumentSelector } from "vscode";
+import * as vscode from "vscode";
 
 import {
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind
-} from 'vscode-languageclient/node';
+    LanguageClient,
+    LanguageClientOptions,
+    ServerOptions,
+    TransportKind,
+} from "vscode-languageclient/node";
+import { semanticProvier, semanticLegend } from "./semanticToken";
+import { builtInClasses, builtInClassesData } from "./tokens";
+import { Variables } from "./completion";
 
 let client: LanguageClient;
 
-export function activate(context: ExtensionContext) {
-  // The server is implemented in node
-  let serverModule = context.asAbsolutePath(path.join('src', 'js', 'server.js'));
-  // The debug options for the server
-  // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
-  let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+export async function activate(context: ExtensionContext) {
+    // The server is implemented in node
+    let serverModule = context.asAbsolutePath(
+        path.join("src", "js", "server.js")
+    );
+    // The debug options for the server
+    // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
+    let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
-  let serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: debugOptions
+    // If the extension is launched in debug mode then the debug server options are used
+    // Otherwise the run options are used
+    let serverOptions: ServerOptions = {
+        run: { module: serverModule, transport: TransportKind.ipc },
+        debug: {
+            module: serverModule,
+            transport: TransportKind.ipc,
+            options: debugOptions,
+        },
+    };
+
+    // Options to control the language client
+    let clientOptions: LanguageClientOptions = {
+        // Register the server for plain text documents
+        documentSelector: [{ scheme: "file", language: "mcf" }],
+        synchronize: {
+            // Notify the server about file changes to '.clientrc files contained in the workspace
+            fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
+        },
+    };
+
+    // Create the language client and start the client.
+    client = new LanguageClient(
+        "mcf",
+        "Language Server Example",
+        serverOptions,
+        clientOptions
+    );
+    const selector: DocumentSelector = {
+        language: 'mcf',
+        scheme: 'file'
     }
-  };
+    languages.registerDocumentSemanticTokensProvider(selector, semanticProvier , semanticLegend);
+    const completionProvider = languages.registerCompletionItemProvider(
+        selector,
+        {
+            provideCompletionItems(document, position, token, context) {
+                let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)/g;
+                const linePrefix = document.lineAt(position).text.substring(0, position.character);
+                for (let item of builtInClassesData) {
+                    if (linePrefix.endsWith(`${item.name}.`)) {
 
-  // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
-    // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'mcf' }],
-    synchronize: {
-      // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
-    }
-  };
+                        var methods: vscode.CompletionItem[] = [];
+                        for (let method of item.staticMethods) {
+                            methods.push(new vscode.CompletionItem(method, vscode.CompletionItemKind.Method));
+                        }
+                        return methods;
+                    }
+                    var regex = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*new\s*([a-zA-Z_][a-zA-Z0-9_]*))?/g
 
-  // Create the language client and start the client.
-  client = new LanguageClient(
-    'mcf',
-    'Language Server Example',
-    serverOptions,
-    clientOptions
-  );
-
-  // Start the client. This will also launch the server
-  client.start();
+                    let result: any;
+                    while ((result = regex.exec(document.getText())) !== null) {
+                        var data = builtInClassesData.filter(v => v.name == result[4])[0]
+                        console.log(result[2]);
+                        if (linePrefix.endsWith(`${result[2]}.`)) {
+                            var methods: vscode.CompletionItem[] = [];
+                            for (let method of data.methods) {
+                                methods.push(new vscode.CompletionItem(method, vscode.CompletionItemKind.Method));
+                            }
+                            return methods;
+                        }
+                    }
+                }
+                return undefined;
+            }
+        },
+        "."
+    )
+    // Start the client. This will also launch the server
+    client.start();
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined;
-  }
-  return client.stop();
+    if (!client) {
+        return undefined;
+    }
+    return client.stop();
 }

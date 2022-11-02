@@ -1,59 +1,97 @@
 {
-  "name": "mcfbuilder",
-  "displayName": "MCFBuilder",
-  "description": "language support for .mcf",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.70.0"
-  },
-  "main": "./src/js/source",
-  "categories": [
-    "Programming Languages"
-  ],
-  "activationEvents": [
-    "onLanguage:mcf"
-  ],
-  "configuration": {
-    "type": "object",
-    "title": "Client configuration",
-    "properties": {
-      "mcf.maxNumberOfProblems": {
-        "scope": "resource",
-        "type": "number",
-        "default": 100,
-        "description": "Controls the maximum number of problems produced by the server."
-      }
-    }
-  },
-  "contributes": {
-    "languages": [
-      {
-        "id": "mcf",
-        "aliases": [
-          "MCFbuilder",
-          "mcf"
-        ],
-        "extensions": [
-          ".mcf"
-        ],
-        "configuration": "./language-configuration.json"
-      }
+    "name": "mcfbuilder",
+    "displayName": "MCFBuilder",
+    "description": "language support for .mcf",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.70.0"
+    },
+    "main": "./src/js/source",
+    "categories": [
+        "Programming Languages"
     ],
-    "grammars": [
-      {
-        "language": "mcf",
-        "scopeName": "source.mcf",
-        "path": "./syntaxes/mcf.tmLanguage.json"
-      }
-    ]
-  },
-  "devDependencies": {
-    "@types/node": "^18.7.13",
-    "@types/vscode": "^1.70.0",
-    "vscode-languageclient": "^8.0.2",
-    "vscode-languageserver": "^8.0.2"
-  },
-  "dependencies": {
-    "vscode-languageserver-textdocument": "^1.0.5"
-  }
+    "activationEvents": [
+        "onLanguage:mcf"
+    ],
+    "configuration": {
+        "type": "object",
+        "title": "Client configuration",
+        "properties": {
+            "mcf.maxNumberOfProblems": {
+                "scope": "resource",
+                "type": "number",
+                "default": 100,
+                "description": "Controls the maximum number of problems produced by the server."
+            }
+        }
+    },
+    "contributes": {
+        "languages": [
+            {
+                "id": "mcf",
+                "aliases": [
+                    "MCFbuilder",
+                    "mcf"
+                ],
+                "extensions": [
+                    ".mcf"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "mcf",
+                "scopeName": "source.mcf",
+                "path": "./syntaxes/mcf.tmLanguage.json"
+            }
+        ],
+        "configurationDefaults": {
+            "[mcf]": {
+                "editor.semanticHighlighting.enabled": true
+            }
+        },
+        "semanticTokenScopes": [
+            {
+                "scopes": {
+                    "normalVariable":["entity.name.variable.mcf"],
+                    "defaultClass":["support.class.mcf"],
+                    "defaultFunction":["support.function.mcf"]
+                }
+            }
+        ],
+        "semanticTokenModifiers": [
+            {
+                "id": "native",
+                "description": "wtf is this"
+            }
+        ],
+        "semanticTokenTypes": [
+            {
+                "id": "normalVariable",
+                "superType": "variable",
+                "description": "variable nice"
+                
+            },
+            {
+                "id": "defaultClass",
+                "superType": "class",
+                "description": "class nice"
+            },
+            {
+                "id": "defaultFunction",
+                "superType": "function",
+                "description": "function nice"
+            }
+        ]
+    },
+    "devDependencies": {
+        "@types/node": "^18.7.13",
+        "@types/vscode": "^1.70.0",
+        "vscode-languageclient": "^8.0.2",
+        "vscode-languageserver": "^8.0.2"
+    },
+    "dependencies": {
+        "vscode-languageserver-textdocument": "^1.0.5"
+    }
 }

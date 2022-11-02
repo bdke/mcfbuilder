@@ -31,9 +31,6 @@
 		},
 		{
 			"include": "#callMethods"
-		},
-		{
-			"include": "#variable"
 		}
 	],
 	"repository": {
@@ -95,9 +92,6 @@
 			"name": "class.method.call.mcf",
 			"match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\.([a-zA-Z_][a-zA-Z0-9_]*)\\b",
 			"captures": {
-				"1": {
-					"name": "variable.name.mcf"
-				},
 				"2": {
 					"name": "entity.name.function.mcf"
 				}
@@ -133,10 +127,6 @@
 			"name": "entity.name.section.mcf",
 			"begin": "#",
 			"end": "\n"
-		},
-		"variable": {
-			"name": "variable.name.mcf",
-			"match": "[a-zA-Z_][a-zA-Z0-9_]*"
 		}
 	},
 	"scopeName": "source.mcf"
