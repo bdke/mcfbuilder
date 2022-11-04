@@ -4,7 +4,12 @@ interface BuiltInClassCompletion {
     staticMethods: string[]
 }
 
-export const keywords = [
+interface KeywordsSnippets {
+    keyword: string,
+    snippet: string
+}
+
+export const keywords: string[] = [
     "if",
     "while",
     "for",
@@ -19,16 +24,80 @@ export const keywords = [
     "score",
     "tag",
     "else",
-    "new"
+    "new",
+    "execute",
+    "predicate"
 ];
-export const builtInFuntions = [
+export const builtInFuntions: string[] = [
     "Write", 
     "LoadFile"
 ];
 
-export const builtInClasses = [
+export const builtInClasses: string[] = [
     "Function",
     "Selector"
+]
+
+export const ifKeywords: KeywordsSnippets[] = [
+    {
+        keyword: "entity",
+        snippet: "entity (${1:SELECTOR}) {${2}}"
+    },
+    {
+        keyword: "predicate",
+        snippet: "predicate (${1:NAMESPACE},${2:FUNCTION_NAME}) {${3}}"
+    },
+    {
+        keyword: "score (compare matches)",
+        snippet: "score (${1} ${2} ${3|==,!=,>,<,>=,<=|}, ${4} {${5}})"
+    },
+    {
+        keyword: "score (matches)",
+        snippet: "score ${1} ${2:to ${3}}${3} ${4} {${5}}"
+    },
+    {
+        keyword: "score (compare)",
+        snippet: "score (${1} ${2} ${3:|==,!=,>,<,>=,<=|} ${4} ${5}) {${6}}"
+    },
+    {
+        keyword: "block",
+        snippet: "block ~${1} ~${2} ~${3} (${4}) {${5}}"
+    },
+    {
+        keyword: "blocks",
+        snippet: "blocks ~${1} ~${2} ~${3} ~${4} ~${5} ~${6} ~${7} ~${8} ~${9} ${10|masked,all|} {${11}}"
+    },
+    {
+        keyword: "data (block)",
+        snippet: "data block ~${1} ~${2} ~${3} ${4} {${5}}"
+    },
+    {
+        keyword: "data (entity)",
+        snippet: "data entity ${1} ${2} {${3}}"
+    },
+    {
+        keyword: "data (storage)",
+        snippet: "data storage ${1} ${2} {${3}}"
+    }
+]
+
+export const executeKeywords: KeywordsSnippets[] = [
+    {
+        keyword: "as",
+        snippet: "as ${1} {${2}}"
+    },
+    {
+        keyword: "at",
+        snippet: "at ${1} {${2}}"
+    },
+    {
+        keyword: "positioned as",
+        snippet: "positioned ${1} {${2}}"
+    },
+    {
+        keyword: "positioned (vector)",
+        snippet: "positioned ~${1} ~${2} ~${3} {${4}}"
+    }
 ]
 
 export const builtInClassesData: BuiltInClassCompletion[] = [
@@ -46,7 +115,11 @@ export const builtInClassesData: BuiltInClassCompletion[] = [
         name: "Selector",
         staticMethods: [],
         methods: [
-            "SetCoordinate"
+            "SetCoordinate",
+            "SetSelector",
+            "SetDistance",
+            "SetVolumeDistance",
+            "GiveEffect"
         ]
     }
 ]

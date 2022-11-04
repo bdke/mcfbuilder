@@ -9,7 +9,7 @@ import {
     TransportKind,
 } from "vscode-languageclient/node";
 import { semanticProvier, semanticLegend } from "./semanticToken";
-import { builtInClasses, builtInClassesData } from "./tokens";
+import { builtInClasses, builtInClassesData, executeKeywords, ifKeywords } from "./tokens";
 import { Variables } from "./completion";
 
 let client: LanguageClient;
@@ -76,7 +76,6 @@ export async function activate(context: ExtensionContext) {
                     let result: any;
                     while ((result = regex.exec(document.getText())) !== null) {
                         var data = builtInClassesData.filter(v => v.name == result[4])[0]
-                        console.log(result[2]);
                         if (linePrefix.endsWith(`${result[2]}.`)) {
                             var methods: vscode.CompletionItem[] = [];
                             for (let method of data.methods) {
@@ -90,6 +89,36 @@ export async function activate(context: ExtensionContext) {
             }
         },
         "."
+    )
+    const completionProvider2 = languages.registerCompletionItemProvider(
+        selector,
+        {
+            provideCompletionItems(document, position, token, context) {
+                const linePrefix = document.lineAt(position).text.substring(0, position.character);
+                if (linePrefix.endsWith("if ")) {
+                    var items: vscode.CompletionItem[] = [];
+                    for (var keyword of ifKeywords) {
+                        var item = new vscode.CompletionItem(keyword.keyword, vscode.CompletionItemKind.Snippet);
+                        item.insertText = new vscode.SnippetString(keyword.snippet);
+                        item.command = {command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...'};
+                        items.push(item);
+                    }
+                    return items;
+                }
+                else if (linePrefix.endsWith("execute ")) {
+                    var items: vscode.CompletionItem[] = [];
+                    for (var keyword of executeKeywords) {
+                        var item = new vscode.CompletionItem(keyword.keyword, vscode.CompletionItemKind.Snippet);
+                        item.insertText = new vscode.SnippetString(keyword.snippet);
+                        item.command = {command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...'};
+                        items.push(item);
+                    }
+                    return items;
+                }
+                return undefined;
+            }
+        },
+        " "
     )
     // Start the client. This will also launch the server
     client.start();

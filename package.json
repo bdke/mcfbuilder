@@ -8,7 +8,8 @@
     },
     "main": "./src/js/source",
     "categories": [
-        "Programming Languages"
+        "Programming Languages",
+        "Snippets"
     ],
     "activationEvents": [
         "onLanguage:mcf"
