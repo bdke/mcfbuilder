@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { CompletionItem, CompletionItemKind } from "vscode-languageserver/node";
-import { keywords, builtInClasses, builtInFuntions } from "./tokens";
+import { keywords, builtInClasses, builtInFuntions, builtInEnumsData } from "./tokens";
 
 interface VariableType {
     name: string,
@@ -44,6 +44,15 @@ export async function getDefinedCompletionItems(text: string): Promise<Completio
             {
                 label: i,
                 kind: CompletionItemKind.Class
+            }
+        );
+    }
+
+    for (let item of builtInEnumsData) {
+        completion.push(
+            {
+                label: item.name,
+                kind: CompletionItemKind.Enum
             }
         );
     }

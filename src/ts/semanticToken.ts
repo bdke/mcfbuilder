@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { builtInClasses, builtInFuntions } from "./tokens";
+import { builtInClasses, builtInClassesData, builtInEnumsData, builtInFuntions } from "./tokens";
 
 
-const tokenTypes = ['class','variable','function'];
+const tokenTypes = ['class','variable','function','enum','enumMember','method'];
 const tokenModifiers = ['declaration'];
 export const semanticLegend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
 
@@ -15,13 +15,17 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
             const builder = new vscode.SemanticTokensBuilder(semanticLegend);
 
             var text = document.getText();
-            let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)/g;
+            let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*new\s*([a-zA-Z_][a-zA-Z0-9_]*))?/g;
             //let variablesResult: RegExpMatchArray | null = text.match(variablesPattern);
 
-            let definedVariables: string[] = [];
+            let definedVariables: {name:string,type:string}[] = [];
+            
             let variableResult;
             while ((variableResult = variablesPattern.exec(text)) !== null) {
-                definedVariables.push(variableResult[2]);
+                definedVariables.push({
+                    name: variableResult[2],
+                    type: variableResult[4]
+                })
             }
 
             var lines = text.split("\n")
@@ -42,13 +46,13 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                 throw new Error();
             }
             let result;
-            for (var item of definedVariables) {
-                var regex = new RegExp("\\b" + item + "\\b","g");
+            for (let item of definedVariables) {
+                var regex = new RegExp("\\b" + item.name + "\\b","g");
                 while ((result = regex.exec(text)) !== null) {
                     var pos = getCharacterLine(regex.lastIndex);
                     builder.push(
                         new vscode.Range(
-                            new vscode.Position(pos[0]-1, pos[1]-item.length),
+                            new vscode.Position(pos[0]-1, pos[1]-item.name.length),
                             new vscode.Position(pos[0]-1, pos[1])
                         ),
                         'variable',
@@ -58,7 +62,7 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
             }
 
 
-            for (var item of builtInClasses) {
+            for (let item of builtInClasses) {
                 var regex = new RegExp("\\b" + item + "\\b","g");
                 while ((result = regex.exec(text)) !== null) {
                     var pos = getCharacterLine(regex.lastIndex);
@@ -72,8 +76,54 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                     )
                 }
             }
+            for (let i of builtInClassesData) {
+                for (let variable of definedVariables) {
+                    if (variable.type != i.name) {
+                        continue;
+                    }
+                    for (let method of i.methods) {
+                        var regex = new RegExp("\\b" + variable.name + '\\.' + method + "\\b","g");
+                        console.log(i.name);
+                        while ((result = regex.exec(text)) !== null) {
+                            var pos = getCharacterLine(regex.lastIndex);
+                            builder.push(
+                                new vscode.Range(
+                                    new vscode.Position(pos[0]-1, pos[1]-method.length),
+                                    new vscode.Position(pos[0]-1, pos[1])
+                                ),
+                                'method',
+                                ['declaration']
+                            )
+                            console.log(document.getText(                            new vscode.Range(
+                                new vscode.Position(pos[0]-1, pos[1]-method.length),
+                                new vscode.Position(pos[0]-1, pos[1])
+                            )));
+                        }
+                    }
+                }
 
-            for (var item of builtInFuntions) {
+                for (let method of i.staticMethods) {
+                    var regex = new RegExp("\\b" + i.name + '\\.' + method + "\\b","g");
+                    console.log(i.name);
+                    while ((result = regex.exec(text)) !== null) {
+                        var pos = getCharacterLine(regex.lastIndex);
+                        builder.push(
+                            new vscode.Range(
+                                new vscode.Position(pos[0]-1, pos[1]-method.length),
+                                new vscode.Position(pos[0]-1, pos[1])
+                            ),
+                            'method',
+                            ['declaration']
+                        )
+                        console.log(document.getText(                            new vscode.Range(
+                            new vscode.Position(pos[0]-1, pos[1]-method.length),
+                            new vscode.Position(pos[0]-1, pos[1])
+                        )));
+                    }
+                }
+            }
+
+            for (let item of builtInFuntions) {
                 var regex = new RegExp("\\b" + item + "\\b","g");
                 while ((result = regex.exec(text)) !== null) {
                     var pos = getCharacterLine(regex.lastIndex);
@@ -83,6 +133,21 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                             new vscode.Position(pos[0]-1, pos[1])
                         ),
                         'function',
+                        ['declaration']
+                    )
+                }
+            }
+
+            for (let item of builtInEnumsData) {
+                var regex = new RegExp("\\b" + item.name + "\\b","g");
+                while ((result = regex.exec(text)) !== null) {
+                    var pos = getCharacterLine(regex.lastIndex);
+                    builder.push(
+                        new vscode.Range(
+                            new vscode.Position(pos[0]-1, pos[1]-item.name.length),
+                            new vscode.Position(pos[0]-1, pos[1])
+                        ),
+                        'enum',
                         ['declaration']
                     )
                 }

@@ -57,7 +57,9 @@
                 "scopes": {
                     "normalVariable":["entity.name.variable.mcf"],
                     "defaultClass":["support.class.mcf"],
-                    "defaultFunction":["support.function.mcf"]
+                    "defaultFunction":["support.function.mcf"],
+                    "defaultEnum":["entity.name.type.enum.mcf"],
+                    "defaultMethod":["entity.name.function.member.mcf"]
                 }
             }
         ],
@@ -83,6 +85,16 @@
                 "id": "defaultFunction",
                 "superType": "function",
                 "description": "function nice"
+            },
+            {
+                "id": "defaultEnum",
+                "superType": "enum",
+                "description": "enum nice"
+            },
+            {
+                "id": "defaultMethod",
+                "superType": "method",
+                "description": "method nice"
             }
         ]
     },

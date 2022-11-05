@@ -9,7 +9,7 @@ import {
     TransportKind,
 } from "vscode-languageclient/node";
 import { semanticProvier, semanticLegend } from "./semanticToken";
-import { builtInClasses, builtInClassesData, executeKeywords, ifKeywords } from "./tokens";
+import { builtInClasses, builtInClassesData, builtInEnumsData, executeKeywords, ifKeywords } from "./tokens";
 import { Variables } from "./completion";
 
 let client: LanguageClient;
@@ -83,6 +83,15 @@ export async function activate(context: ExtensionContext) {
                             }
                             return methods;
                         }
+                    }
+                }
+                for (let item of builtInEnumsData) {
+                    if (linePrefix.endsWith(`${item.name}.`)) {
+                        var members: vscode.CompletionItem[] = [];
+                        for (let member of item.members) {
+                            members.push(new vscode.CompletionItem(member, vscode.CompletionItemKind.Enum));
+                        }
+                        return members;
                     }
                 }
                 return undefined;
