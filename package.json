@@ -59,7 +59,8 @@
                     "defaultClass":["support.class.mcf"],
                     "defaultFunction":["support.function.mcf"],
                     "defaultEnum":["entity.name.type.enum.mcf"],
-                    "defaultMethod":["entity.name.function.member.mcf"]
+                    "defaultMethod":["entity.name.function.member.mcf"],
+                    "enumMembers":["variable.other.enummember.mcf"]
                 }
             }
         ],
@@ -95,6 +96,11 @@
                 "id": "defaultMethod",
                 "superType": "method",
                 "description": "method nice"
+            },
+            {
+                "id": "enumMembers",
+                "superType": "enumMember",
+                "description": "enum good"
             }
         ]
     },

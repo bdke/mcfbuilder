@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { builtInClasses, builtInClassesData, builtInEnumsData, builtInFuntions } from "./tokens";
 
-
+const definedVariables: {name:string,type:string,file:string,modifier:string}[] = [];
 const tokenTypes = ['class','variable','function','enum','enumMember','method'];
 const tokenModifiers = ['declaration'];
 export const semanticLegend = new vscode.SemanticTokensLegend(tokenTypes, tokenModifiers);
@@ -18,13 +18,14 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
             let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*new\s*([a-zA-Z_][a-zA-Z0-9_]*))?/g;
             //let variablesResult: RegExpMatchArray | null = text.match(variablesPattern);
 
-            let definedVariables: {name:string,type:string}[] = [];
             
             let variableResult;
             while ((variableResult = variablesPattern.exec(text)) !== null) {
                 definedVariables.push({
                     name: variableResult[2],
-                    type: variableResult[4]
+                    type: variableResult[4],
+                    file: document.fileName,
+                    modifier: variableResult[1]
                 })
             }
 
@@ -45,8 +46,11 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                 }
                 throw new Error();
             }
-            let result;
+            let result: any;
             for (let item of definedVariables) {
+                if (item.file !== document.fileName) {
+                    continue;
+                }
                 var regex = new RegExp("\\b" + item.name + "\\b","g");
                 while ((result = regex.exec(text)) !== null) {
                     var pos = getCharacterLine(regex.lastIndex);
@@ -78,12 +82,8 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
             }
             for (let i of builtInClassesData) {
                 for (let variable of definedVariables) {
-                    if (variable.type != i.name) {
-                        continue;
-                    }
                     for (let method of i.methods) {
                         var regex = new RegExp("\\b" + variable.name + '\\.' + method + "\\b","g");
-                        console.log(i.name);
                         while ((result = regex.exec(text)) !== null) {
                             var pos = getCharacterLine(regex.lastIndex);
                             builder.push(
@@ -94,17 +94,12 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                                 'method',
                                 ['declaration']
                             )
-                            console.log(document.getText(                            new vscode.Range(
-                                new vscode.Position(pos[0]-1, pos[1]-method.length),
-                                new vscode.Position(pos[0]-1, pos[1])
-                            )));
                         }
                     }
                 }
 
                 for (let method of i.staticMethods) {
                     var regex = new RegExp("\\b" + i.name + '\\.' + method + "\\b","g");
-                    console.log(i.name);
                     while ((result = regex.exec(text)) !== null) {
                         var pos = getCharacterLine(regex.lastIndex);
                         builder.push(
@@ -115,10 +110,6 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                             'method',
                             ['declaration']
                         )
-                        console.log(document.getText(                            new vscode.Range(
-                            new vscode.Position(pos[0]-1, pos[1]-method.length),
-                            new vscode.Position(pos[0]-1, pos[1])
-                        )));
                     }
                 }
             }
@@ -148,6 +139,25 @@ export const semanticProvier: vscode.DocumentSemanticTokensProvider = {
                             new vscode.Position(pos[0]-1, pos[1])
                         ),
                         'enum',
+                        ['declaration']
+                    )
+                }
+            }
+            
+            for (let item of builtInEnumsData) {
+                var regex = new RegExp("\\b" + item.name + "\\.([a-zA-Z_][a-zA-Z0-9_]*)" + "\\b","g");
+                while ((result = regex.exec(text)) !== null) {
+                    var pos = getCharacterLine(regex.lastIndex);
+                    var member = item.members.find(v => v == result[1]);
+                    if (member == null) {
+                        continue;
+                    }
+                    builder.push(
+                        new vscode.Range(
+                            new vscode.Position(pos[0]-1, pos[1]-member?.length),
+                            new vscode.Position(pos[0]-1, pos[1])
+                        ),
+                        'enumMember',
                         ['declaration']
                     )
                 }

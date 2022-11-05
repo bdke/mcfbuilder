@@ -161,7 +161,7 @@ connection.onDidChangeWatchedFiles((_change) => {
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
     async (_textDocumentPosition: TextDocumentPositionParams): Promise<CompletionItem[]> => {
-        return await getDefinedCompletionItems(text);
+        return await getDefinedCompletionItems(text,connection);
     }
 );
 

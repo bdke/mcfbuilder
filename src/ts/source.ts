@@ -11,7 +11,7 @@ import {
 import { semanticProvier, semanticLegend } from "./semanticToken";
 import { builtInClasses, builtInClassesData, builtInEnumsData, executeKeywords, ifKeywords } from "./tokens";
 import { Variables } from "./completion";
-
+const definedVariables: {name:string,type:string,modifier:string,file:string}[] = [];
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
@@ -60,7 +60,17 @@ export async function activate(context: ExtensionContext) {
         selector,
         {
             provideCompletionItems(document, position, token, context) {
-                let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)/g;
+                let variablesPattern = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*new\s*([a-zA-Z_][a-zA-Z0-9_]*))?/g;
+                let variableResult;
+                while ((variableResult = variablesPattern.exec(document.getText())) !== null) {
+                    definedVariables.push({
+                        name: variableResult[2],
+                        type: variableResult[4],
+                        modifier: variableResult[1],
+                        file: document.fileName
+                    })
+                }
+
                 const linePrefix = document.lineAt(position).text.substring(0, position.character);
                 for (let item of builtInClassesData) {
                     if (linePrefix.endsWith(`${item.name}.`)) {
@@ -71,14 +81,22 @@ export async function activate(context: ExtensionContext) {
                         }
                         return methods;
                     }
-                    var regex = /(var|global)\s*([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*new\s*([a-zA-Z_][a-zA-Z0-9_]*))?/g
-
-                    let result: any;
-                    while ((result = regex.exec(document.getText())) !== null) {
-                        var data = builtInClassesData.filter(v => v.name == result[4])[0]
-                        if (linePrefix.endsWith(`${result[2]}.`)) {
+                    // let result: any;
+                    // while ((result = regex.exec(document.getText())) !== null) {
+                    //     var data = builtInClassesData.filter(v => v.name == result[4])[0]
+                    //     if (linePrefix.endsWith(`${result[2]}.`)) {
+                    //         var methods: vscode.CompletionItem[] = [];
+                    //         for (let method of data.methods) {
+                    //             methods.push(new vscode.CompletionItem(method, vscode.CompletionItemKind.Method));
+                    //         }
+                    //         return methods;
+                    //     }
+                    // }
+                    for (let i of definedVariables) {
+                        var data:any = builtInClassesData.find(v => v.name == i.type);
+                        if (linePrefix.endsWith(`${i.name}.`)) {
                             var methods: vscode.CompletionItem[] = [];
-                            for (let method of data.methods) {
+                            for (let method of data?.methods) {
                                 methods.push(new vscode.CompletionItem(method, vscode.CompletionItemKind.Method));
                             }
                             return methods;

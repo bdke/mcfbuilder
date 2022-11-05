@@ -33,7 +33,6 @@ export const keywords: string[] = [
     "else",
     "new",
     "execute",
-    "predicate"
 ];
 export const builtInFuntions: string[] = [
     "Write", 
@@ -68,16 +67,40 @@ export const ifKeywords: KeywordsSnippets[] = [
         snippet: "score (${1} ${2} ${3:|==,!=,>,<,>=,<=|} ${4} ${5}) {${6}}"
     },
     {
-        keyword: "block",
+        keyword: "block (~)",
         snippet: "block ~${1} ~${2} ~${3} (${4}) {${5}}"
     },
     {
-        keyword: "blocks",
+        keyword: "block (^)",
+        snippet: "block ^${1} ^${2} ^${3} (${4}) {${5}}"
+    },
+    {
+        keyword: "block (excact)",
+        snippet: "block ${1} ${2} ${3} (${4}) {${5}}"
+    },
+    {
+        keyword: "blocks (~)",
         snippet: "blocks ~${1} ~${2} ~${3} ~${4} ~${5} ~${6} ~${7} ~${8} ~${9} ${10|masked,all|} {${11}}"
     },
     {
-        keyword: "data (block)",
+        keyword: "blocks (^)",
+        snippet: "blocks ^${1} ^${2} ^${3} ^${4} ^${5} ^${6} ^${7} ^${8} ^${9} ${10|masked,all|} {${11}}"
+    },
+    {
+        keyword: "blocks (excact)",
+        snippet: "blocks ~${1} ~${2} ~${3} ~${4} ~${5} ~${6} ~${7} ~${8} ~${9} ${10|masked,all|} {${11}}"
+    },
+    {
+        keyword: "data (block) (~)",
         snippet: "data block ~${1} ~${2} ~${3} ${4} {${5}}"
+    },
+    {
+        keyword: "data (block) (^)",
+        snippet: "data block ^${1} ^${2} ^${3} ${4} {${5}}"
+    },
+    {
+        keyword: "data (block) (excact)",
+        snippet: "data block ${1} ${2} ${3} ${4} {${5}}"
     },
     {
         keyword: "data (entity)",
@@ -103,8 +126,16 @@ export const executeKeywords: KeywordsSnippets[] = [
         snippet: "positioned as ${1} {${2}}"
     },
     {
-        keyword: "positioned (vector)",
+        keyword: "positioned (~)",
         snippet: "positioned ~${1} ~${2} ~${3} {${4}}"
+    },
+    {
+        keyword: "positioned (^)",
+        snippet: "positioned ^${1} ^${2} ^${3} {${4}}"
+    },
+    {
+        keyword: "positioned (excact)",
+        snippet: "positioned ${1} ${2} ${3} {${4}}"
     }
 ]
 
